@@ -1,4 +1,9 @@
+; Basak Tepe
+; 2020400117
+; compiling: no
+; complete: no
 #lang racket
+
 
 (provide (all-defined-out))
 
@@ -48,20 +53,36 @@
 
 ; solution starts here
 ; 1. empty-state (5 points)
-(define empty-state 0)
+(define empty-state (hash))
+
+
 ; 2. get (5 points)
 (define get 0)
+
+
 ; 3. put (5 points)
 (define put 0)
+
+
 ; 4. := (15 points)
 (define := 0)
+
+
 ; 5. if: (15 points)
 (define if: 0)
+
+
 ; 6. while: (15 points)
 (define while: 0)
+
+
 ; 7. func (15 points)
 (define func 0)
+
+
 ; 8. eval-expr (20 points)
 (define eval-expr 0)
+
+
 ; 9 eval-exprs (5 points)
 (define eval-exprs 0)
