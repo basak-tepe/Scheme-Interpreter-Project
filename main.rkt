@@ -53,12 +53,19 @@
 
 ; solution starts here
 ; 1. empty-state (5 points)
+;(define empty-state 0)
 (define empty-state (hash))
 
 
 ; 2. get (5 points)
-(define get 0)
+;(define get 0)
 
+;state is a hash. 
+(define (get state var)
+    (let ((val (hash-ref state var #f))) ;#f is the default value if the key is not found
+    (if (not (eq? val #f)) ;if the key is found, val is not false.
+        val
+    (eval var)))) ;else (if key not found) evaluate the key.
 
 ; 3. put (5 points)
 (define put 0)
