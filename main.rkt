@@ -1,3 +1,7 @@
+;needed updates:
+;dont print procedure for last 2 inputs of function 2.
+
+
 ; Basak Tepe
 ; 2020400117
 ; compiling: no
@@ -67,8 +71,14 @@
         val
     (eval var)))) ;else (if key not found) evaluate the key.
 
+
+
 ; 3. put (5 points)
-(define put 0)
+;(define put 0)
+(define (put state var val)
+    (let ((newstate (hash-set state var val))) ;update the value or create a new key-value pair
+    newstate));return the new state
+
 
 
 ; 4. := (15 points)
