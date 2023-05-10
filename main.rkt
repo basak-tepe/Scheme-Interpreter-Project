@@ -1,5 +1,8 @@
 ;needed updates:
 ;dont print procedure for last 2 inputs of function 2.
+;continue working from function 7. 
+;work on evaluating function.
+;revise and test 4 5 6.
 
 
 ; Basak Tepe
@@ -197,11 +200,12 @@
 
 
 
-
-
-
-
-
-
 ; 9 eval-exprs (5 points)
-(define eval-exprs 0)
+;Given a list of expressions exprs, this function evaluates each expression in exprs with eval-expr
+;function and returns the resulting state after evaluating the last expression in exprs. You need to
+;call each expression with the resulting state of the previous expression.
+;Hint: foldl.
+;(define eval-exprs 0)
+(define (eval-exprs exprs state)
+    (foldl (lambda (expr state) (eval-expr expr state)) state exprs) ;foldl stands for fold left. recursively combines.
+    )
