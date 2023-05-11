@@ -133,9 +133,9 @@
             ;((eq? (car expr) 'lambda) 
                     ;(put state '-r (eval expr)))
             ;symbol needs rework
-            ((symbol? (car expr)) 
-                (map-eval expr state) ;map-eval all of the elements in the list and apply the operation to the resulting values.
-                (put state '-r (eval expr)))
+            ;((symbol? (car expr)) 
+            ;   (map-eval expr state) ;map-eval all of the elements in the list and apply the operation to the resulting values.
+            ;  (put state '-r (eval expr)))
     
     )
     
@@ -144,11 +144,12 @@
             (printf   "NUMBER CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
             (eval expr)); 
             ((boolean? expr) 
-            (put state '-r expr)) ;a literal:  put the boolean into -r.
+            (eval expr)); 
             ((string? expr) 
-            (put state '-r expr)) ;a literal:  put the string into -r.
+            (eval expr));
             ((number? (get state expr)) ;a variable: if the variable with a value is found in the state     
-            (put state '-r (get state expr))) ; a variable: put the var into -r
+            (printf   "VARIABLE CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
+            (eval (get state expr)))
     ))
             );
 
