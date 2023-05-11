@@ -91,11 +91,13 @@
 ;with eval-expr function and returns a list of the results together with the resulting state after
 ;evaluating the last expression in lst. This function is not mandatory, but it is highly suggested to
 ;use this function in eval-expr function.
+;(define map-eval 0)
 
-(define (map-eval lst state) ;lst is a list of expressions
-    (let ((result (map (lambda (x) (eval-expr x state)) lst))) ;result is a list of results of the expressions in lst
-    (let ((newstate (put state '-r (car (reverse result))))) ;newstate is the state after evaluating the last expression in lst
-        (cons result newstate)))) ;return a list of the results together with the resulting state after evaluating the last expression in lst
+(define (map-eval lst state)
+        (let ((result (eval (car lst))))
+        (let ((rest-result (map-eval (cdr lst) result)))
+        (list (cons (get result '-r) (car rest-result)) (cdr rest-result)))))
+
 
 
 ; 9. eval-expr (20 points)
@@ -133,9 +135,11 @@
             ;((eq? (car expr) 'lambda) 
                     ;(put state '-r (eval expr)))
             ;symbol needs rework
-            ;((symbol? (car expr)) 
-            ;   (map-eval expr state) ;map-eval all of the elements in the list and apply the operation to the resulting values.
-            ;  (put state '-r (eval expr)))
+            ((symbol? (car expr))  ;operation cases
+            (printf   "SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
+            (eval expr))
+            ;(map-eval expr state) ;map-eval all of the elements in the list and apply the operation to the resulting values.
+            ;(put state '-r (eval expr)))
     
     )
     
