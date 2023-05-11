@@ -88,16 +88,24 @@
 
 ;extra function map-eval
 ;Given a list of expressions lst and a state state, this function evaluates each expression in lst
-;with eval-expr function and returns a list of the results together with the resulting state after
+;with eval-expr function and returns results together with the resulting state after
 ;evaluating the last expression in lst. This function is not mandatory, but it is highly suggested to
 ;use this function in eval-expr function.
 ;(define map-eval 0)
+;(+ 2 b)
 
 (define (map-eval lst state)
-        (let ((result (eval (car lst))))
-        (let ((rest-result (map-eval (cdr lst) result)))
-        (list (cons (get result '-r) (car rest-result)) (cdr rest-result)))))
-
+    (printf "THE LIST IS  ~a\n" lst);
+    ;first element is the operator
+    (let* ((operator (car lst))
+            (operands (cdr lst))
+            (results (map (lambda (operand) (eval-expr operand state)) operands))) ;map each element of list (exprs) to values. resut is a list of mappings.
+            ;results is a pure numeric exp list. for example, ( 2 b) gets to the form of ( 2 6)
+    (let ((new-expr (cons operator results))) ;add the operator back to the list.
+    (printf "THE NEW EXPR IS  ~a\n" new-expr);
+    (let ((newstate (put state '-r (eval new-expr)))) ;evaluate the new expression and put it to the state.
+    (printf "THE NEW STATE IS  ~a\n" newstate);
+    newstate)))) ;return the new state. with -r variable updated.
 
 
 ; 9. eval-expr (20 points)
@@ -137,7 +145,7 @@
             ;symbol needs rework
             ((symbol? (car expr))  ;operation cases
             (printf   "SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
-            (eval expr))
+            (eval (get (map-eval expr state) '-r))) ; mapreturns the new state with -r updated. i.e -r is our returned value to be used. 
             ;(map-eval expr state) ;map-eval all of the elements in the list and apply the operation to the resulting values.
             ;(put state '-r (eval expr)))
     
@@ -148,8 +156,10 @@
             (printf   "NUMBER CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
             (eval expr)); 
             ((boolean? expr) 
+            (printf   "BOOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
             (eval expr)); 
             ((string? expr) 
+            (printf   "STRING CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
             (eval expr));
             ((number? (get state expr)) ;a variable: if the variable with a value is found in the state     
             (printf   "VARIABLE CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
