@@ -3,6 +3,7 @@
 ;continue working from function 7. 
 ;work on evaluating function.
 ;revise and test 4 5 6.
+;function 4 - last 2 input examples.
 ;lambda needs rework in 9.
 ;symbol needs rewok in 9.
 ;read map-eval written by co-pilot.
@@ -157,6 +158,9 @@
             (eval expr)); 
             ((boolean? expr) 
             (printf   "BOOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
+            (eval expr)); 
+            ((symbol? expr) 
+            (printf   "SINGLE SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
             (eval expr)); 
             ((string? expr) 
             (printf   "STRING CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
