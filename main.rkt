@@ -8,6 +8,7 @@
 ;symbol needs rewok in 8.
 ;read map-eval written by co-pilot.
 ;work on 5 and 9.
+; we cannot evaluate false on 5.
 
 ; Basak Tepe
 ; 2020400117
@@ -65,7 +66,10 @@
 ; solution starts here
 ; 1. empty-state (5 points)
 ;(define empty-state 0)
-(define empty-state (hash))
+(define empty-state 
+    (let ((state (hash)))
+    (hash-set state '-r 0))) ;initialize -r to 0
+
 
 
 ; 2. get (5 points)
@@ -171,7 +175,14 @@
             ((boolean? expr) 
             (printf   "BOOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
                 (let ((val (eval expr)))
-                (put state '-r val)));put returns the newstate 
+                (printf "the value is ~a \n" val)
+                (cond   ((eq? val #t)
+                        (printf "WE ARE ADDING TRUE TO THE STATE ~a \n" val)
+                        (put state '-r '#t))
+                        ((eq? val #f)
+                        (printf "WE ARE ADDING FALSE  TO THE STATE ~a \n" val)
+                        (put state '-r '#f))
+                )));put returns the newstate
 
             ((symbol? expr) 
             (printf   "SINGLE SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
@@ -202,8 +213,8 @@
 ;temporary. only handles numbers right now.
 
 (define (:= var val-expr state)
-  (let ((new-state (eval-expr val-expr state)))
-    (put new-state var (get new-state '-r))))
+    (let ((new-state (eval-expr val-expr state)))
+        (put new-state var (get new-state '-r))))
 
 
 
@@ -212,31 +223,24 @@
 ;This function takes a test expression test-expr, a list of then expressions then-exprs, a list of
 ;else expressions else-exprs, and a state state, and returns the result of then expressions if the
 ;test expression evaluates to true, and the result of else expressions otherwise. You will evaluate
+
+
 ;the test expression with eval-expr function and evaluate then-exprs if -r is true in the resulting
 ;state after evaluating test-expr, and evaluate else-exprs otherwise.
 ;Tip: It is again highly suggested that you first implement this function for primitive types, and
 ;then extend it to handle function calls and function definitions
 ;(define if: 0)
 (define (if: test-expr then-exprs else-exprs state)
-  (let ((test (eval-expr test-expr state)))
-    (cond ((eq? test #t)
+  (printf "we are in if: \n")
+  (let ((test-state (eval-expr test-expr state)))
+  (printf "we are in if: and test-state is ~a \n" test-state) 
+    (cond ((eq? (hash-ref test-state '-r) #t)
            (printf "EXPR IS TRUE AND EXPR IS ~a \n" test-expr)
           (eval-exprs then-exprs state))
-          ((eq? test #f)
+          (else
            (printf "EXPR IS FALSE AND EXPR IS ~a \n" test-expr)
            (eval-exprs else-exprs state))
-          (else (error "Test expression must be a boolean value")))))
-
-
-; 6. while: (15 points)
-;This function takes a test expression test-expr, a list of body expressions body-exprs, and a state
-;state. It evaluates the test expression with eval-expr function and evaluates the body expressions
-;if -r is true in the resulting state after evaluating test-expr. It repeats this process until -r is false
-;in the resulting state after evaluating test-expr. It returns the resulting state after evaluating the
-;last test expression (since it will be the last expression to be evaluated).
-;(define while: 0)
-
-
+         )))
 
 
 ; 9 eval-exprs (5 points)
@@ -246,10 +250,20 @@
 ;Hint: foldl.
 ;(define eval-exprs 0)
 (define (eval-exprs exprs state)
-    (let ((val (foldl (lambda (state expr) (eval-expr expr state)) state exprs)));foldl stands for fold left. recursively combines.
-    (let ((newstate (put state '-r val)))
-newstate)))
+(display "we are in eval-exprs \n")
+  (foldl (lambda (expr acc-state)
+           (eval-expr expr acc-state))
+           state
+           exprs))
 
+
+; 6. while: (15 points)
+;This function takes a test expression test-expr, a list of body expressions body-exprs, and a state
+;state. It evaluates the test expression with eval-expr function and evaluates the body expressions
+;if -r is true in the resulting state after evaluating test-expr. It repeats this process until -r is false
+;in the resulting state after evaluating test-expr. It returns the resulting state after evaluating the
+;last test expression (since it will be the last expression to be evaluated).
+;(define while: 0)
 
 
 
