@@ -2,13 +2,14 @@
 ;dont print procedure for last 2 inputs of function 2.
 ;continue working from function 7. 
 ;work on evaluating function.
-;revise and test 5 6.
-;function 4 - last 2 input examples.
+;revise and test 6.
+;function 4 - last 1 input example.
+;function 5 - last 2 input examples.
 ;lambda needs rework in 8.
 ;symbol needs rewok in 8.
 ;read map-eval written by co-pilot.
-;work on 5 and 9.
-; we cannot evaluate false on 5.
+;got stuck in while.
+;9.
 
 ; Basak Tepe
 ; 2020400117
@@ -66,9 +67,8 @@
 ; solution starts here
 ; 1. empty-state (5 points)
 ;(define empty-state 0)
-(define empty-state 
-    (let ((state (hash)))
-    (hash-set state '-r 0))) ;initialize -r to 0
+(define empty-state
+        (hash))
 
 
 
@@ -154,8 +154,10 @@
                 (put state '-r val)));put returns the newstate 
 
             ;lambda needs rework
-            ;((eq? (car expr) 'lambda) 
-                    ;(put state '-r (eval expr)))
+            ((eq? (car expr) 'lambda) 
+                (let ((val (eval expr)))
+                (put state '-r val)));put returns the newstate
+
             ;symbol needs rework
             ((symbol? (car expr))  ;operation cases
             (printf   "SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
@@ -230,17 +232,19 @@
 ;Tip: It is again highly suggested that you first implement this function for primitive types, and
 ;then extend it to handle function calls and function definitions
 ;(define if: 0)
+
+
 (define (if: test-expr then-exprs else-exprs state)
   (printf "we are in if: \n")
   (let ((test-state (eval-expr test-expr state)))
   (printf "we are in if: and test-state is ~a \n" test-state) 
     (cond ((eq? (hash-ref test-state '-r) #t)
-           (printf "EXPR IS TRUE AND EXPR IS ~a \n" test-expr)
-          (eval-exprs then-exprs state))
-          (else
-           (printf "EXPR IS FALSE AND EXPR IS ~a \n" test-expr)
-           (eval-exprs else-exprs state))
-         )))
+            (printf "EXPR IS TRUE AND EXPR IS ~a \n" test-expr)
+            (eval-exprs then-exprs state))
+            (else
+            (printf "EXPR IS FALSE AND EXPR IS ~a \n" test-expr)
+            (eval-exprs else-exprs state))
+            )))
 
 
 ; 9 eval-exprs (5 points)
@@ -251,10 +255,10 @@
 ;(define eval-exprs 0)
 (define (eval-exprs exprs state)
 (display "we are in eval-exprs \n")
-  (foldl (lambda (expr acc-state)
-           (eval-expr expr acc-state))
-           state
-           exprs))
+    (foldl (lambda (expr acc-state)
+            (eval-expr expr acc-state))
+            state
+            exprs))
 
 
 ; 6. while: (15 points)
@@ -264,10 +268,21 @@
 ;in the resulting state after evaluating test-expr. It returns the resulting state after evaluating the
 ;last test expression (since it will be the last expression to be evaluated).
 ;(define while: 0)
+(define (while: test-expr body-exprs state)
+    (let ((test-state (eval-expr test-expr state)))
+    (if (hash-ref test-state '-r) ; if -r is true in the resulting state after evaluating test-expr
+        (begin
+            (display "we are in while: and test-case is true")
+            (newline)
+            (let ((body-state (eval-exprs body-exprs state)))
+            (if (hash-ref body-state '-r) ; if -r is true in the resulting state after evaluating body exprs - repeat
+                (while: test-expr body-exprs body-state)
+                body-state)))
+        state)))
 
 
 
-(define while: 0)
+
 (define func 0)
 
 
