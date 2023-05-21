@@ -105,13 +105,13 @@
     (printf "THE NEW EXPR IS  ~a\n" new-expr);
     (let ((newstate (put state '-r (eval new-expr)))) ;evaluate the new expression and put it to the state.
     (printf "THE NEW STATE IS  ~a\n" newstate);
- newstate)))) 
+    newstate)))) 
 
     ;(if (eq? #f (hash-ref newstate '-r)) ;if the value is false
-     ;   ((printf "THE VALUE IS FALSE\n")
-      ;  (let ((return-state (put newstate '-r 99999)));set it to some dummy -r 99999
-       ; return-state)) ;return the new state. with -r variable updated.
-        ;newstate))));return the new state. with -r variable updated.
+    ;   ((printf "THE VALUE IS FALSE\n")
+    ;  (let ((return-state (put newstate '-r 99999)));set it to some dummy -r 99999
+    ; return-state)) ;return the new state. with -r variable updated.
+    ;newstate))));return the new state. with -r variable updated.
     ;)
     
 
@@ -165,7 +165,8 @@
             ;symbol needs rework
             ((symbol? (car expr))  ;operation cases
             (printf   "SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
-            (let ((val  (eval (get (map-eval expr state) '-r))))
+            (let ((val (eval (hash-ref (map-eval expr state) '-r ))))
+            (printf "map eval done and val is ~a \n" val)
             (put state '-r val)));put returns the newstate 
 
             ;(map-eval expr state) ;map-eval all of the elements in the list and apply the operation to the resulting values.
