@@ -1,13 +1,9 @@
 ;needed updates:
 ;dont print procedure for last 2 inputs of function 2.
 ;work on evaluating function - func part.
-;revise and test 6.
-;:= - last 1 input example.
-;if - last 1 input example (false)
-; if while func
+;:= assignment last 1 input example.
+;while func
 ; map eval outputu farklı
-;continue working from function 7. 
-;i guess there is a problem with calls like := a 5. it is not working.
 ;got stuck in eval-exprs.
 ;got stuck in while.
 ;got stuck in func.
@@ -150,8 +146,17 @@
 
     
             ((eq? (car expr) 'while:) 
-                (let ((val (eval (cons 'while: expr))))
-                (put state '-r val)));put returns the newstate 
+                (printf "we are in eval-expr and while section \n")
+                (let ((rem-exp (cdr expr)))
+                (printf "rem-exp is ~a\n" rem-exp)
+                (printf "first arg ~a\n" (car rem-exp))
+                (printf "second arg ~a\n" (car (cdr rem-exp)))
+                ;calling my while function with proper bits of the expression
+                (let ((return-state (while: (car rem-exp) (car (cdr rem-exp)) state)))
+
+                (let ((val (get return-state '-r)))
+                (printf "value is ~a\n" val)
+                (put return-state '-r val)))))
             
             ((eq? (car expr) 'func)
                 (let ((val (eval (cons 'func: expr))))
@@ -214,7 +219,6 @@
     (printf "at := ~a ~a ~a\n" var val-expr state)
     (let ((new-state (eval-expr val-expr state)))
     (put new-state var (get new-state '-r))))
-    
 
 
 
@@ -237,17 +241,33 @@
 
 
 (define (while: test-expr body-exprs state)
-    (let ((test-state (eval-expr test-expr state)))
-    (if (hash-ref test-state '-r) ; if -r is true in the resulting state after evaluating test-expr
-        (begin ;begin is forbidden
-            (display "we are in while: and test-case is true")
-            (newline)
-            (let ((body-state (eval-exprs body-exprs test-state)))
-            (print "we are in while: and evaluated body state is ~a \n" body-state)
-            (if (hash-ref body-state '-r) ; if -r is true in the resulting state after evaluating body exprs - repeat
-                (while: test-expr body-exprs body-state)
-                body-state)))
-        state)))
+
+    (printf "we are in while: \n")
+
+    (let ((test-state (eval-expr test-expr state))) ;a state where '-r is either true or false.
+    (printf "we are in while: and test-state is ~a \n" test-state)
+
+    (cond 
+            ((eq? (hash-ref test-state '-r) #t) ;if the test expr is true; we will evaluate the body exprs and then evaluate the test expr again.
+            (printf "test expr is true ~a \n" test-expr)
+            (let ((new-state (eval-exprs body-exprs state)))
+            (let ((new-test-state (eval-expr test-expr new-state))) ;evaluate the test expr in the new state.
+            (printf "new-test-state is ~a \n" new-test-state)
+            (if (eq? (hash-ref new-test-state '-r) #t)
+                ((printf "test exp still true ~a \n" test-expr)
+                (while: test-expr body-exprs new-state))
+                ; else return the new state.
+                ((printf "test exp became false ~a \n" test-expr)
+
+
+                ;we cannot return the new state here.
+                new-test-state)))));return the new state.
+
+            (else ;if the test expr is false, we will return the state.
+            (printf "test expr is false ~a \n" test-expr)
+            state))test-state))
+
+
 
 
 (define (func params body-exprs state)
