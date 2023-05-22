@@ -2,10 +2,9 @@
 ;dont print procedure for last 2 inputs of function 2.
 ;work on evaluating function - func part.
 ;:= assignment last 1 input example.
-;while func
+;func
 ; map eval outputu farklı
-;got stuck in eval-exprs.
-;got stuck in while.
+;refine eval-expr
 ;got stuck in func.
 
 ; Basak Tepe
@@ -236,7 +235,7 @@
 
 
 (define (eval-exprs exprs state)
-    (foldl eval-expr state exprs))
+        (foldl eval-expr state exprs))
 
 
 
@@ -253,23 +252,12 @@
             (let ((new-state (eval-exprs body-exprs state)))
             (let ((new-test-state (eval-expr test-expr new-state))) ;evaluate the test expr in the new state.
             (printf "new-test-state is ~a \n" new-test-state)
-            (if (eq? (hash-ref new-test-state '-r) #t)
-                ((printf "test exp still true ~a \n" test-expr)
-                (while: test-expr body-exprs new-state))
-                ; else return the new state.
-                ((printf "test exp became false ~a \n" test-expr)
 
-
-                ;we cannot return the new state here.
-                new-test-state)))));return the new state.
-
-            (else ;if the test expr is false, we will return the state.
-            (printf "test expr is false ~a \n" test-expr)
-            state))test-state))
-
-
-
-
-(define (func params body-exprs state)
-    (let ((new-state (put state '-r (lambda (args state) (eval-exprs body-exprs (create-hash params args))))))
-    new-state))
+            (cond ((eq? (hash-ref new-test-state '-r) #t)
+                ;then evaluate the body exprs again.
+                (printf "test exp still true ~a \n" test-expr)
+                (while: test-expr body-exprs new-state)) ;evaluate the body exprs again.
+                (else
+                (let ((new-state (put new-state '-r #f))) ;latest evaluated exp - test exp is false. make it false.
+                new-state))
+            )))))));return the new state.
