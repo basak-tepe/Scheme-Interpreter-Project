@@ -158,8 +158,16 @@
                 (put return-state '-r val)))))
             
             ((eq? (car expr) 'func)
-                (let ((val (eval (cons 'func: expr))))
-                (put state '-r val)));put returns the newstate 
+                (printf "we are in eval-expr and func section \n")
+                (let ((rem-exp (cdr expr)))
+                (printf "rem-exp is ~a\n" rem-exp)
+                (printf "first arg ~a\n" (car rem-exp))
+                (printf "second arg ~a\n" (car (cdr rem-exp)))
+                ;calling my func with proper bits of the expression
+                (let ((return-state (func (car rem-exp) (car (cdr rem-exp)) state)))
+                (let ((val (get return-state '-r)))
+                (printf "value is ~a\n" val)
+                (put return-state '-r val)))))
 
             ;lambda needs rework
             ((eq? (car expr) 'lambda) 
@@ -261,3 +269,32 @@
                 (let ((new-state (put new-state '-r #f))) ;latest evaluated exp - test exp is false. make it false.
                 new-state))
             )))))));return the new state.
+
+
+
+;It creates a function that takes a list of arguments args and a state state and evaluates
+;body-exprs with args and state, and returns the value of the -r variable in the resulting state
+;after evaluating body expressions (does not return a state unlike others). The resulting function is
+;bound to the -r variable in the resulting state.
+;Disclaimer: The state should not be modified by the function. However, the function should be
+;able to access to variables in the state. The only modification to the state should be the binding of
+;the function to the -r variable.
+
+;Examples:
+;> (func '(x y) '((:= x (* x x)) (:= y (- y x))) empty-state)
+;'#hash((-r . #<procedure:...>) (now, we can get the function from the result)
+;> ((get (func '(x y) '((:= x (* x x)) (:= y (- y x))) empty-state) '-r) 5 10)
+;-15 (see that the function only returns a value, not a state)
+;> ((get (func '(x) '((:= x (* x x)) (:= y (- y x))) (hash 'y 100)) '-r) 5)
+;75 (see that the function can access the variables in the state)
+
+
+
+(define (func params body-exprs state)
+    (printf "we are in func: \n")
+    (printf "params are ~a \n" params)
+    (printf "body-exprs are ~a \n" body-exprs)
+    (printf "state is ~a \n" state)
+    ;(create-hash params args)
+    (let ((new-state (put state '-r (lambda params (get (eval-exprs body-exprs state) '-r)))))
+    new-state))
