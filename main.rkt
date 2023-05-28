@@ -1,15 +1,6 @@
-;needed updates:
-;dont print procedure for last 2 inputs of function 2.
-;work on evaluating function - func part.
-;:= assignment last 1 input example.
-;func
-; map eval outputu farklı
-;refine eval-expr
-;got stuck in func.
-
 ; Basak Tepe
 ; 2020400117
-; compiling: no
+; compiling: yes
 ; complete: no
 #lang racket
 
@@ -62,16 +53,12 @@
 
 ; solution starts here
 ; 1. empty-state (5 points)
-;(define empty-state 0)
 (define empty-state
         (hash))
 
 
 
-; 2. get (5 points)
-;(define get 0)
-
-;state is a hash. 
+; 2. get (5 points) 
 (define (get state var)
     (let ((val (hash-ref state var #f))) ;#f is the default value if the key is not found
     (if (not (eq? val #f)) ;if the key is found, val is not false.
@@ -81,42 +68,31 @@
 
 
 ; 3. put (5 points)
-;(define put 0)
 (define (put state var val)
     (let ((newstate (hash-set state var val))) ;update the value or create a new key-value pair
     newstate));return the new state
 
 
 
-
+;extra function
 (define (map-eval lst state)
-    (printf "THE LIST IS  ~a\n" lst);
-    ;first element is the operator
+    ;first element is the operator, rest are the operands. (+ 2 3)
     (let* ((operator (car lst))
             (operands (cdr lst))
-            (results (map (lambda (operand) (get (eval-expr operand state) '-r)) operands))) ;map each element of list (exprs) to values. resut is a list of mappings.
+            (results (map (lambda (operand) (get (eval-expr operand state) '-r)) operands))) ;map each element of list (operand) to values. resut is a revealed list of values.
             ;results is a pure numeric exp list. for example, ( 2 b) gets to the form of ( 2 6)
     (let ((new-expr (cons operator results))) ;add the operator back to the list.
-    (printf "THE NEW EXPR IS  ~a\n" new-expr);
     (let ((newstate (put state '-r (eval new-expr)))) ;evaluate the new expression and put it to the state.
-    (printf "THE NEW STATE IS  ~a\n" newstate);
     newstate)))) 
 
-    ;(if (eq? #f (hash-ref newstate '-r)) ;if the value is false
-    ;   ((printf "THE VALUE IS FALSE\n")
-    ;  (let ((return-state (put newstate '-r 99999)));set it to some dummy -r 99999
-    ; return-state)) ;return the new state. with -r variable updated.
-    ;newstate))));return the new state. with -r variable updated.
-    ;)
-    
 
 
 
-
+;4. eval-expr
 (define (eval-expr expr state)
     (if (and (list? expr) (> (length expr) 1)) ;if it is a list
-    ;we will go into a switch-like structure.
 
+    ;we will go into a switch-like structure.
     (cond   ((eq? (car expr) ':=) 
 
                 ;removing := from exp
@@ -124,147 +100,110 @@
                 ;calling the := function I implemented with proper bits of the expression
                 (let (( return-state (:= (car rem-exp) (car (cdr rem-exp)) state)))
                 (let ((val (get return-state '-r)))
-                (printf "value is ~a\n" val)
                 (put return-state '-r val))))
 
             );put returns the newstate   
 
 
             ((eq? (car expr) 'if:) 
-                (printf "we are in eval-expr and if section \n")
                 (let ((rem-exp (cdr expr)))
-                (printf "rem-exp is ~a\n" rem-exp)
-                (printf "first arg ~a\n" (car rem-exp))
-                (printf "second arg ~a\n" (car (cdr rem-exp)))
-                (printf "third arg  ~a\n" (car (cdr (cdr rem-exp))))
+                ;calling the if function I implemented with proper bits of the expression
                 (let ((return-state (if: (car rem-exp) (car (cdr rem-exp)) (car (cdr (cdr rem-exp))) state)))
-
                 (let ((val (get return-state '-r)))
-                (printf "value is ~a\n" val)
                 (put return-state '-r val)))))
 
     
             ((eq? (car expr) 'while:) 
-                (printf "we are in eval-expr and while section \n")
                 (let ((rem-exp (cdr expr)))
-                (printf "rem-exp is ~a\n" rem-exp)
-                (printf "first arg ~a\n" (car rem-exp))
-                (printf "second arg ~a\n" (car (cdr rem-exp)))
                 ;calling my while function with proper bits of the expression
                 (let ((return-state (while: (car rem-exp) (car (cdr rem-exp)) state)))
-
                 (let ((val (get return-state '-r)))
-                (printf "value is ~a\n" val)
                 (put return-state '-r val)))))
             
             ((eq? (car expr) 'func)
-                (printf "we are in eval-expr and func section \n")
                 (let ((rem-exp (cdr expr)))
-                (printf "rem-exp is ~a\n" rem-exp)
-                (printf "first arg ~a\n" (car rem-exp))
-                (printf "second arg ~a\n" (car (cdr rem-exp)))
                 ;calling my func with proper bits of the expression
                 (let ((return-state (func (car rem-exp) (car (cdr rem-exp)) state)))
                 (let ((val (get return-state '-r)))
-                (printf "value is ~a\n" val)
                 (put return-state '-r val)))))
 
-            ;lambda needs rework
+            ;lambda
             ((eq? (car expr) 'lambda) 
                 (let ((val (eval expr)))
                 (put state '-r val)));put returns the newstate
 
-            ;symbol needs rework
+            ;symbol cases
             ((symbol? (car expr))  ;operation cases
-            (printf   "SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
-            (let ((val (eval (hash-ref (map-eval expr state) '-r ))))
-            (printf "map eval done and val is ~a \n" val)
+            (let ((val (eval (hash-ref (map-eval expr state) '-r )))) ; map (+ 2 a) to (+ 2 3) and evaluate it.
             (put state '-r val)));put returns the newstate 
-
-            ;(map-eval expr state) ;map-eval all of the elements in the list and apply the operation to the resulting values.
-            ;(put state '-r (eval expr)))  
     )
     
-    ;else it is variable or literal
+    ;if not a list then it is variable or literal
     (cond   ((number? expr) 
-            (printf   "NUMBER CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
                 (let ((val (eval expr)))
                 (put state '-r val)));put returns the newstate 
 
             ((boolean? expr) 
-            (printf   "BOOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
                 (let ((val (eval expr)))
-                (printf "the value is ~a \n" val)
                 (cond   ((eq? val #t)
-                        (printf "WE ARE ADDING TRUE TO THE STATE ~a \n" val)
                         (put state '-r '#t))
                         ((eq? val #f)
-                        (printf "WE ARE ADDING FALSE  TO THE STATE ~a \n" val)
                         (put state '-r '#f))
                 )));put returns the newstate
 
             ((symbol? expr) 
-            (printf   "SINGLE SYMBOL CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
-
-            
-                (let ((val (get state expr)))
+                (let ((val (get state expr))) ;looking it up
                 (put state '-r val)));put returns the newstate 
 
             ((string? expr) 
-            (printf   "STRING CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
                 (let ((val (eval expr)))
                 (put state '-r val)));put returns the newstate 
 
-            ((number? (get state expr)) ;a variable: if the variable with a value is found in the state     
-            (printf   "VARIABLE CASE IN EVAL-EXPR AND EXPR IS ~a \n" expr)
+            ((number? (get state expr)) 
                 (let ((val (eval (get state expr))))
                 (put state '-r val)));put returns the newstate 
     )));
 
 
+;5 (:= var val-expr state)
 (define (:= var val-expr state)
-    (printf "at := ~a ~a ~a\n" var val-expr state)
-    (let ((new-state (eval-expr val-expr state)))
+    (let ((new-state (eval-expr val-expr state))) ;evaluate right hand side. Then put it into both the '-r and the var in the state.
     (put new-state var (get new-state '-r))))
 
 
-
+;6. (if: test-expr then-exprs else-exprs state)
 (define (if: test-expr then-exprs else-exprs state)
-    (printf "we are in if: \n")
+    ;we are in if
     (let ((test-state (eval-expr test-expr state)))
-    (printf "we are in if: and test-state is ~a \n" test-state) 
+    ;we tested the test expr and got a state where '-r is either true or false.
     (cond ((eq? (hash-ref test-state '-r) #t)
-            (printf "EXPR IS TRUE AND EXPR IS ~a \n" test-expr)
+            ;if the test expr is true; we will evaluate the then exprs.
             (eval-exprs then-exprs state))
             (else
-            (printf "EXPR IS FALSE AND EXPR IS ~a \n" test-expr)
+            ;if the test expr is false; we will evaluate the else exprs.
             (eval-exprs else-exprs state))
             )))
 
 
-(define (eval-exprs exprs state)
+;7. (eval-exprs exprs state)
+(define (eval-exprs exprs state) ;evaluate all expressions and gather the results.
         (foldl eval-expr state exprs))
 
 
 
+;8. (while: test-expr body-exprs state)
 (define (while: test-expr body-exprs state)
+    (let ((test-state (eval-expr test-expr state))) ;a state where '-r is either true or false, it is the value of test-expr.
 
-    (printf "we are in while: \n")
-
-    (let ((test-state (eval-expr test-expr state))) ;a state where '-r is either true or false.
-    (printf "we are in while: and test-state is ~a \n" test-state)
-
+    ;switch structure
     (cond 
             ((eq? (hash-ref test-state '-r) #t) ;if the test expr is true; we will evaluate the body exprs and then evaluate the test expr again.
-            (printf "test expr is true ~a \n" test-expr)
             (let ((new-state (eval-exprs body-exprs state)))
             (let ((new-test-state (eval-expr test-expr new-state))) ;evaluate the test expr in the new state.
-            (printf "new-test-state is ~a \n" new-test-state)
-
+            ;if it is true, we will evaluate the body exprs by calling while again.
             (cond ((eq? (hash-ref new-test-state '-r) #t)
-                ;then evaluate the body exprs again.
-                (printf "test exp still true ~a \n" test-expr)
                 (while: test-expr body-exprs new-state)) ;evaluate the body exprs again.
+                ;else we will return the new state.
                 (else
                 (let ((new-state (put new-state '-r #f))) ;latest evaluated exp - test exp is false. make it false.
                 new-state))
@@ -272,29 +211,17 @@
 
 
 
-;It creates a function that takes a list of arguments args and a state state and evaluates
-;body-exprs with args and state, and returns the value of the -r variable in the resulting state
-;after evaluating body expressions (does not return a state unlike others). The resulting function is
-;bound to the -r variable in the resulting state.
-;Disclaimer: The state should not be modified by the function. However, the function should be
-;able to access to variables in the state. The only modification to the state should be the binding of
-;the function to the -r variable.
-
-;Examples:
-;> (func '(x y) '((:= x (* x x)) (:= y (- y x))) empty-state)
-;'#hash((-r . #<procedure:...>) (now, we can get the function from the result)
-;> ((get (func '(x y) '((:= x (* x x)) (:= y (- y x))) empty-state) '-r) 5 10)
-;-15 (see that the function only returns a value, not a state)
-;> ((get (func '(x) '((:= x (* x x)) (:= y (- y x))) (hash 'y 100)) '-r) 5)
-;75 (see that the function can access the variables in the state)
-
-
-
+;9. (func params body-exprs state)
 (define (func params body-exprs state)
-    (printf "we are in func: \n")
-    (printf "params are ~a \n" params)
-    (printf "body-exprs are ~a \n" body-exprs)
-    (printf "state is ~a \n" state)
-    ;(create-hash params args)
+    ;creates a lambda procedure
+    ;puts this procedure into the state in '-r.
+    ;lamda procedure is responsible for evaluating the body-exprs with the given params, then returning the result.
     (let ((new-state (put state '-r (lambda params (get (eval-exprs body-exprs state) '-r)))))
     new-state))
+
+
+
+
+
+
+
